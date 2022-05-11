@@ -126,7 +126,7 @@ const RickAndMorty = ({ characters, error, next }: Characters) => {
       <div style={{ display: "flex", flexDirection: "row", width: "100%" }}>
         <input
           type="text"
-          name="search"
+          name="filter"
           data-testid="filter-input-name"
           placeholder="Search Char"
           value={filter}

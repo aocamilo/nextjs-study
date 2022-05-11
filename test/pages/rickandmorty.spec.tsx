@@ -49,15 +49,16 @@ describe("When in the rick and morty app", () => {
   });
 
   it("Should set and clear filter correctly", () => {
-    const { filterInput, resetFilter } = renderComponent();
+    const { filterInput, resetFilter, characters } = renderComponent();
 
     expect(filterInput.value).toBe("");
 
     fireEvent.change(filterInput, {
-      target: { value: "morty" },
+      target: { value: "morty", name: "filter" },
     });
 
     expect(filterInput.value).toBe("morty");
+    // expect(characters.length).toBe(3);
 
     fireEvent.click(resetFilter);
 

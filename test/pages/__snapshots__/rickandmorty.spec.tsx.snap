@@ -1,5 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`When in the rick and morty app It should match the snapshot 1`] = `[Function]`;
-
-exports[`When in the rick and morty app Should set and clear filter correctly 1`] = `[Function]`;

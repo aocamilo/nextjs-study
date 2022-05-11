@@ -1,4 +1,4 @@
-import { render, act, fireEvent, waitFor } from "@testing-library/react";
+import { render, fireEvent, waitFor } from "@testing-library/react";
 import RickAndMorty from "../../pages/rickandmorty";
 import "@testing-library/jest-dom";
 import rickAndMortyMock from "../rickAndMortyMock.json";

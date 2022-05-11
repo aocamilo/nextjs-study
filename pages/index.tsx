@@ -1,6 +1,6 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import type { NextPage } from "next";
+import Head from "next/head";
+import styles from "../styles/Home.module.css";
 
 const Home: NextPage = () => {
   return (
@@ -11,10 +11,13 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <p>This is an app made to study and understand some concepts about Nextjs, SSR, SSG, CSR, and more... Please use the nav.</p>
+        <p data-testid="message">
+          This is an app made to study and understand some concepts about
+          Nextjs, SSR, SSG, CSR, and more... Please use the nav.
+        </p>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

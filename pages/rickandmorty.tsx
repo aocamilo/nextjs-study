@@ -1,6 +1,7 @@
-import Head from 'next/head';
-import Image from 'next/image';
-import { loader } from './pokemon';
+import Head from "next/head";
+import Image from "next/image";
+import { loader } from "./pokemon";
+import { useCallback, useState } from "react";
 
 /*
   SSG only works on server-side and at build time, it can work either using external data or static data.
@@ -37,21 +38,31 @@ import { loader } from './pokemon';
 */
 
 export async function getServerSideProps() {
-
-  const res = await fetch('https://rickandmortyapi.com/api/character');
+  const res = await fetch("https://rickandmortyapi.com/api/character");
   const characters = await res.json();
+
+  console.log(characters);
+
+  if (characters.error) {
+    return {
+      props: {
+        error: characters.error,
+      },
+    };
+  }
 
   return {
     props: {
-      characters: characters.results
-    }
-  }
+      characters: characters.results,
+      next: characters.info.next,
+    },
+  };
 }
 
-interface Character {
+export interface Character {
   name: string;
   image: string;
-  id: string;
+  id: number;
   gender: string;
   species: string;
   status: string;
@@ -59,9 +70,53 @@ interface Character {
 
 interface Characters {
   characters: Character[];
+  error?: string;
+  next?: string;
 }
 
-const RickAndMorty = ({ characters }: Characters) => {
+const RickAndMorty = ({ characters, error, next }: Characters) => {
+  const [filter, setFilter] = useState("");
+  const [filteredChars, setFilteredChars] = useState(characters);
+  const [runError, setRunError] = useState(null);
+
+  const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(event.target.value.toLowerCase());
+
+    if (event.target.value === "") {
+      setFilteredChars(characters);
+      return;
+    }
+
+    setFilteredChars(filterChars(filter));
+  };
+
+  const filterChars = useCallback(
+    (f: string) => {
+      return characters.filter((char) => char.name.toLowerCase().includes(f));
+    },
+    [filter]
+  );
+
+  const onResetFilter = () => {
+    setFilteredChars(characters);
+    setFilter("");
+  };
+
+  const onNextPage = async () => {
+    console.log("called");
+
+    if (next) {
+      const res = await fetch(next);
+      const resp = await res.json();
+
+      if (resp.error) {
+        setRunError(resp.error);
+        return;
+      }
+    }
+  };
+
+  if (error || runError) return <>{error ?? runError}</>;
 
   if (!characters || characters.length === 0) return <>Loading...</>;
 
@@ -70,17 +125,71 @@ const RickAndMorty = ({ characters }: Characters) => {
       <Head>
         <title>Rick And Morty - SSR / SSG</title>
       </Head>
-      {characters.map(({ name, image, id, gender, species, status }: Character) => (
-        <div className="card d-flex col-3" key={`${id}-${name}`}>
-          <h2> {name} </h2>
-          <Image loader={loader} src={image} alt={name} width={300} height={300} layout="fixed" />
-          <p className='mt-5 mb-0 p-0'>Gender: {gender}</p>
-          <p className='m-0 p-0'>Species: {species}</p>
-          <p>Status: {status}</p>
-        </div>
-      ))}
+      <div style={{ display: "flex", flexDirection: "row", width: "100%" }}>
+        <input
+          type="text"
+          name="search"
+          data-testid="filter-input-name"
+          placeholder="Search Char"
+          value={filter}
+          onChange={onInputChange}
+          style={{ position: "absolute", top: 70, width: "20%" }}
+        />
+        <button
+          name="reset-filter"
+          data-testid="reset-filter"
+          onClick={onResetFilter}
+          style={{
+            marginTop: 50,
+            position: "relative",
+            top: 0,
+            width: "20%",
+          }}
+        >
+          Reset Filter
+        </button>
+        {next && (
+          <button
+            data-testid="fetch-next-page"
+            name="fetch-more"
+            onClick={onNextPage}
+            style={{
+              marginTop: 50,
+              position: "relative",
+              top: 0,
+              width: "20%",
+            }}
+          >
+            Fetch more
+          </button>
+        )}
+      </div>
+
+      {filteredChars.map(
+        ({ name, image, id, gender, species, status }: Character) => (
+          <div
+            className="card d-flex col-3"
+            key={`${id}-${name}`}
+            style={{ marginTop: 10 }}
+            data-testid="character"
+          >
+            <h2> {name} </h2>
+            <Image
+              loader={loader}
+              src={image}
+              alt={name}
+              width={300}
+              height={300}
+              layout="fixed"
+            />
+            <p className="mt-5 mb-0 p-0">Gender: {gender}</p>
+            <p className="m-0 p-0">Species: {species}</p>
+            <p>Status: {status}</p>
+          </div>
+        )
+      )}
     </div>
-  )
-}
+  );
+};
 
 export default RickAndMorty;

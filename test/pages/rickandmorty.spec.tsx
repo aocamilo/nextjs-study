@@ -1,8 +1,9 @@
-import { render, fireEvent, waitFor } from "@testing-library/react";
+import { render, fireEvent, screen, waitFor } from "@testing-library/react";
 import RickAndMorty from "../../pages/rickandmorty";
 import "@testing-library/jest-dom";
 import rickAndMortyMock from "../rickAndMortyMock.json";
 import { Character } from "../../pages/rickandmorty";
+import userEvent from "@testing-library/user-event";
 
 describe("When in the rick and morty app", () => {
   const originalFetch = window.fetch;
@@ -18,12 +19,13 @@ describe("When in the rick and morty app", () => {
   });
 
   function renderComponent() {
-    const { getByTestId, getAllByTestId, asFragment, getByText } = render(
-      <RickAndMorty
-        characters={rickAndMortyMock as Character[]}
-        next="https://rickandmortyapi.com/api/character?page=2"
-      />
-    );
+    const { getByTestId, getAllByTestId, asFragment, getByText, rerender } =
+      render(
+        <RickAndMorty
+          characters={rickAndMortyMock as Character[]}
+          next="https://rickandmortyapi.com/api/character?page=2"
+        />
+      );
 
     return {
       characters: getAllByTestId("character"),
@@ -33,6 +35,7 @@ describe("When in the rick and morty app", () => {
       asFragment,
       getByText,
       getAllByTestId,
+      rerender,
     };
   }
 
@@ -48,17 +51,21 @@ describe("When in the rick and morty app", () => {
     expect(characters.length).toBe(20);
   });
 
-  it("Should set and clear filter correctly", () => {
-    const { filterInput, resetFilter, characters } = renderComponent();
+  it("Should set, apply and clear filter correctly", async () => {
+    const { filterInput, resetFilter, characters, getAllByTestId } =
+      renderComponent();
 
     expect(filterInput.value).toBe("");
+    expect(characters.length).toBe(20);
 
-    fireEvent.change(filterInput, {
-      target: { value: "morty", name: "filter" },
-    });
+    // fireEvent.change(filterInput, {
+    //   target: { value: "morty", name: "filter" },
+    // });
+
+    await userEvent.type(filterInput, "morty"); //Mimics the user typing
 
     expect(filterInput.value).toBe("morty");
-    // expect(characters.length).toBe(3);
+    expect(getAllByTestId("character").length).toBe(2);
 
     fireEvent.click(resetFilter);
 

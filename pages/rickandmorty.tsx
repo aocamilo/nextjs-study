@@ -101,8 +101,6 @@ const RickAndMorty = ({ characters, error, next }: Characters) => {
   };
 
   const onNextPage = async () => {
-    console.log("called");
-
     if (next) {
       const res = await fetch(next);
       const resp = await res.json();
